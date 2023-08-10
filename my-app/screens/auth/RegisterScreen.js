@@ -34,10 +34,10 @@ export default function RegisterScreen({navigation}) {
             const width = Dimensions.get('window').width - 20 * 2;
             setDimensions(width);
         };
-        Dimensions.addEventListener('change', onChange);
+        const subscription = Dimensions.addEventListener('change', onChange);
 
         return () => {
-            Dimensions.removeEventListener('change', onChange);
+            subscription?.remove();
         };
     }, []);
 

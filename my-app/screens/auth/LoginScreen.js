@@ -1,17 +1,16 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Dimensions,
+    ImageBackground,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     StyleSheet,
     Text,
-    View,
-    ImageBackground,
     TextInput,
     TouchableOpacity,
-    Platform,
-    KeyboardAvoidingView,
-    Keyboard,
     TouchableWithoutFeedback,
-    Dimensions,
-    Button,
+    View,
 } from 'react-native';
 import {useDispatch} from "react-redux";
 import {authSignInUser} from "../../redux/auth/authOperations";
@@ -23,33 +22,36 @@ const initialState = {
 
 export default function LoginScreen({navigation}) {
     const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-    const [state, setstate] = useState(initialState);
+    const [state, setState] = useState(initialState);
 
-    const [dimensions, setdimensions] = useState(Dimensions.get('window').width - 20 * 2);
+    const [dimensions, setDimensions] = useState(Dimensions.get('window').width - 20 * 2);
     const dispatch = useDispatch();
 
     useEffect(() => {
         const onChange = () => {
             const width = Dimensions.get('window').width - 20 * 2;
-            setdimensions(width);
+            setDimensions(width);
         };
-        Dimensions.addEventListener('change', onChange);
+        const subscription = Dimensions.addEventListener('change', onChange);
+
         return () => {
-            Dimensions.removeEventListener('change', onChange);
+            subscription?.remove();
         };
     }, []);
 
     const keyboardHide = () => {
         setIsShowKeyboard(false);
         Keyboard.dismiss();
-        setstate(initialState);
+        setState(initialState);
     };
 
     const handleSubmit = () => {
         keyboardHide();
         dispatch(authSignInUser(state));
-        setstate(initialState);
+        setState(initialState);
     }
+
+    const updateState = (key, value) => setState(prevState => ({...prevState, [key]: value}));
 
     return (
         <TouchableWithoutFeedback onPress={keyboardHide}>
@@ -58,7 +60,7 @@ export default function LoginScreen({navigation}) {
                     style={styles.image}
                     source={require('../../assets/images/stars-on-night.jpg')}
                 >
-                    <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding' : 'height'}>
+                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                         <View
                             style={{
                                 ...styles.form,
@@ -78,7 +80,7 @@ export default function LoginScreen({navigation}) {
                                     textAlign={'center'}
                                     onFocus={() => setIsShowKeyboard(true)}
                                     value={state.email}
-                                    onChangeText={value => setstate(prevState => ({...prevState, email: value}))}
+                                    onChangeText={value => updateState('email', value)}
                                 />
                             </View>
                             <View style={{marginTop: 20}}>
@@ -89,7 +91,7 @@ export default function LoginScreen({navigation}) {
                                     secureTextEntry={true}
                                     onFocus={() => setIsShowKeyboard(true)}
                                     value={state.password}
-                                    onChangeText={value => setstate(prevState => ({...prevState, password: value}))}
+                                    onChangeText={value => updateState('password', value)}
                                 />
                             </View>
                             <TouchableOpacity activeOpacity={0.8} style={styles.btn} onPress={handleSubmit}>
